@@ -1,4 +1,4 @@
-# WAPA: Workload-Aware Performance Allocation Policy
+# WAPA policy: A Microarchitecture- and Workload-Agnostic Universal SMT Scheduler
 
 ## Overview
 
