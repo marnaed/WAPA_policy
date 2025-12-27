@@ -1,7 +1,5 @@
 # WAPA policy: A Microarchitecture- and Workload-Agnostic Universal SMT Scheduler
 
-## Overview
-
 This repository contains the C++ implementation of the **WAPA policy**. WAPA is a T2C allocation policy for SMT processors grounded in Optimal Transport theory. 
 
 
