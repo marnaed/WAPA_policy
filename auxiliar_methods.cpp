@@ -15,12 +15,8 @@ double cost( std::vector<double> M,  std::vector<double> G, int n, double reg){
     // multiply M and G
     // sum all elements of the multiplication of M and G
     double sum = 0;
-    for(int i=0; i<n; i++){
-        for (int j=0; j<n; j++){
-            for (int k=0; k<n; k++){
-                sum += M[i*n+k]*G[k*n+j];
-            }
-        }
+    for(int i=0; i<n*n; i++){
+        sum += M[i] * G[i];
     }
 
     // apply (1/2)x² (element-wise) to all elements of G and sum them
@@ -131,17 +127,15 @@ std::vector<double> emd( std::vector<double> a,  std::vector<double> b, std::vec
 double phi( int n,  std::vector<double> xk,  std::vector<double> pk, double alpha){
     double sum = 0;
     if (alpha < 0){
-        for (int i=0; i<n; i++){
-            for (int j=0; j<n; j++){
-                sum += (xk[i*n+j])*(xk[i*n+j]);
-            }
+        for (int i=0; i < n*n; i++){
+            double val = xk[i];
+            sum += val * val;
         }
     }
-    else{
-        for (int i=0; i<n; i++){
-            for (int j=0; j<n; j++){
-                sum += (xk[i*n+j] + alpha*pk[i*n+j])*(xk[i*n+j] + alpha*pk[i*n+j]);
-            }
+    else {
+        for (int i=0; i < n*n; i++){
+            double val = xk[i] + alpha * pk[i];
+            sum += val * val;
         }
     }
     return sum/2;
@@ -197,12 +191,8 @@ std::pair<double, double> scalar_search_armijo( int n, std::vector<double> xk, s
 std::pair<double, double> line_search_armijo( int n, std::vector<double> xk, std::vector<double> pk, std::vector<double> gfk, double old_fval){  
     // get the sum of the product of pk and gfk
     double derphi0 = 0;
-    for(int i=0; i<n; i++){
-        for (int j=0; j<n; j++){
-            for (int k=0; k<n; k++){
-                derphi0 += pk[i*n+k]*gfk[k*n+j];
-            }
-        }
+    for(int i=0; i<n*n; i++){
+        derphi0 += pk[i] * gfk[i];
     }
     std::pair<double, double> pair = scalar_search_armijo(n, xk, pk, old_fval, derphi0);
     return pair;
@@ -276,6 +266,17 @@ std::vector<double> ot_square_regularization( std::vector<double> a,  std::vecto
         if (rel_delta_cost_G < 1e-9){
             stop = true;
         }
+
+        // Simetric matrix : we want to ensure that G is symmetric, so we can average G with its transpose (elimine numerics artefacts)
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) { // Fixa't en el "i + 1"
+                double val = (G[i * n + j] + G[j * n + i]) / 2.0;
+                G[i * n + j] = val;
+                G[j * n + i] = val;
+            }
+        }
+
+        
     }
     return G;
 }
