@@ -8,7 +8,6 @@
 // ----------------------
 
 // --------------------------------------------------
-// 2024 - 01 - 10 
 // Methods for Optimal Transport
 // 1. Method for the cost
 double cost( std::vector<double> M,  std::vector<double> G, int n, double reg){
@@ -31,7 +30,6 @@ double cost( std::vector<double> M,  std::vector<double> G, int n, double reg){
     // return the sum of the two sums
     return sum + reg*sum2;
 }
-// ____ 2024 - 01 - 10
 // 2. Method EMD 
 int EMD( int n1, int n2, std::vector<double> X, std::vector<double> Y, std::vector<double> D, std::vector<double> &G, std::vector<double> alpha, std::vector<double> beta, double cost, uint64_t maxIter)  {
 
@@ -267,7 +265,7 @@ std::vector<double> ot_square_regularization( std::vector<double> a,  std::vecto
             stop = true;
         }
 
-        // Simetric matrix : we want to ensure that G is symmetric, so we can average G with its transpose (elimine numerics artefacts)
+        // Simetric matrix: we want to ensure that G is symmetric, so we can average G with its transpose (eliminate numerical artefacts)
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) { // Fixa't en el "i + 1"
                 double val = (G[i * n + j] + G[j * n + i]) / 2.0;
