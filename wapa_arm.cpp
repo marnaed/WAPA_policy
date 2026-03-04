@@ -90,43 +90,7 @@ void WAPA::apply(uint64_t current_interval, const tasklist_t &tasklist)
 		const auto &primer = mezclas [num_comb];
 		std::map<uint32_t, uint32_t>::iterator iterador;
 		uint64_t ID; pid_t PID;
-		// ---
-		for (const auto &puntero : tasklist){
-			const Task &task     = *puntero; ID  = task.id;   PID = task.pids[0];
-			id_pid[ID] = PID;	
-		}
-	
-        // Allocating the applications
-		// Prepared for 8 applications
-		// To adapt: Adding a case and allocating the new applications
-        if (size_wk == 8 ){
-            LOGINF("..         --__--__--        ..");
-		    LOGINF("comb: [{} {} {} {} {} {} {} {}]"_format(std::get<0>(primer), std::get<1>(primer), std::get<2>(primer), std::get<3>(primer), std::get<4>(primer), std::get<5>(primer), std::get<6>(primer), std::get<7>(primer)));
-		    LOGINF("..         --__--__--        ..");
-
-		    for(iterador =id_pid.begin(); iterador != id_pid.end(); iterador++){
-		    	int id_principal = iterador -> first;
-		    	if(id_principal == std::get<0>(primer)){
-		    		set_cpu_affinity_V2(0, iterador -> second);
-                }else if (id_principal == std::get<1>(primer)){
-		    		set_cpu_affinity_V2(28, iterador -> second);
-		    	}else if (id_principal == std::get<2>(primer)){
-		    		set_cpu_affinity_V2(1, iterador -> second);
-		    	}else if (id_principal ==std::get<3>(primer)){
-		    		set_cpu_affinity_V2(29, iterador -> second);
-                }else if (id_principal == std::get<4>(primer)){
-		    		set_cpu_affinity_V2(2, iterador -> second);
-                }else if (id_principal == std::get<5>(primer)){
-		    		set_cpu_affinity_V2(30, iterador -> second);
-                }else if (id_principal == std::get<6>(primer)){
-		    		set_cpu_affinity_V2(3, iterador -> second);
-                }else if (id_principal == std::get<7>(primer)) {
-		    		set_cpu_affinity_V2(31, iterador -> second);
-                }
-		    }
-        }
-
-		// collect data for each application of the mix
+        // collect data for each application of the mix
     	pid_t taskPID;  
     	uint64_t taskID;
 		double ipcTotal = 0;
@@ -170,6 +134,44 @@ void WAPA::apply(uint64_t current_interval, const tasklist_t &tasklist)
 			    ipc = inst / cycl;
 			    ipcTotal += ipc;
     	} 
+        
+		// ---
+		for (const auto &puntero : tasklist){
+			const Task &task     = *puntero; ID  = task.id;   PID = task.pids[0];
+			id_pid[ID] = PID;	
+		}
+	
+        // Allocating the applications
+		// Prepared for 8 applications
+		// To adapt: Adding a case and allocating the new applications
+        if (size_wk == 8 ){
+            LOGINF("..         --__--__--        ..");
+		    LOGINF("comb: [{} {} {} {} {} {} {} {}]"_format(std::get<0>(primer), std::get<1>(primer), std::get<2>(primer), std::get<3>(primer), std::get<4>(primer), std::get<5>(primer), std::get<6>(primer), std::get<7>(primer)));
+		    LOGINF("..         --__--__--        ..");
+
+		    for(iterador =id_pid.begin(); iterador != id_pid.end(); iterador++){
+		    	int id_principal = iterador -> first;
+		    	if(id_principal == std::get<0>(primer)){
+		    		set_cpu_affinity_V2(0, iterador -> second);
+                }else if (id_principal == std::get<1>(primer)){
+		    		set_cpu_affinity_V2(28, iterador -> second);
+		    	}else if (id_principal == std::get<2>(primer)){
+		    		set_cpu_affinity_V2(1, iterador -> second);
+		    	}else if (id_principal ==std::get<3>(primer)){
+		    		set_cpu_affinity_V2(29, iterador -> second);
+                }else if (id_principal == std::get<4>(primer)){
+		    		set_cpu_affinity_V2(2, iterador -> second);
+                }else if (id_principal == std::get<5>(primer)){
+		    		set_cpu_affinity_V2(30, iterador -> second);
+                }else if (id_principal == std::get<6>(primer)){
+		    		set_cpu_affinity_V2(3, iterador -> second);
+                }else if (id_principal == std::get<7>(primer)) {
+		    		set_cpu_affinity_V2(31, iterador -> second);
+                }
+		    }
+        }
+
+		
 		LOGINF("comb_necesarias {} | comb_realizadas {}"_format(size_comb, num_comb));
 		return;
 	} // end loop

@@ -93,6 +93,51 @@ void optimal_transport::apply(uint64_t current_interval, const tasklist_t &taskl
 		const auto &primer = mezclas [num_comb];
 		std::map<uint32_t, uint32_t>::iterator iterador;
 		uint64_t ID; pid_t PID;
+        // collect data for each application of the mix
+    	pid_t taskPID;  
+        uint64_t taskID;
+		double ipcTotal = 0;
+        // cpi obtaining values
+		for (const auto &task_ptr : tasklist) {
+			const Task &task     = *task_ptr;
+			taskID = task.id; 
+    	    std::string taskName = task.name; 
+			taskPID = task.pids[0]; 
+			//############################################################# 
+            // Performance counters for the CPI
+            double cycles       = task.stats[0].last("cpu_clk_unhalted.thread");
+            double instructions = task.stats[0].last("inst_retired.any");
+            // ----
+            uint64_t cpu    = get_cpu_id(taskPID);
+            
+			// Saving the values
+			for (const auto &Task_co_runner : tasklist) {
+				const Task &co_runner = *Task_co_runner;
+				uint64_t ID_co_runner = co_runner.id; 
+				pid_t PID_co_runner   = co_runner.pids[0]; 
+				uint64_t cpu_co_runner= get_cpu_id(PID_co_runner);
+
+				if(cpu == cpu_co_runner + SMTDIST || cpu == cpu_co_runner - SMTDIST){
+                    // Minimizing the CPI
+                    double cpi = cycles / instructions; 
+					M [taskID][ID_co_runner] += cpi; //CPI of the applications 
+					M [ID_co_runner][taskID] += cpi; //CPI of the applications   
+
+				}
+                // To avoid trying to pair an application with itself
+                // High cost for the diagonal of the matrix
+                if (taskID == ID_co_runner ){ M [ID_co_runner][taskID] = 100.0; } 
+            } // End for
+			    double inst = 0, cycl = 0, ipc = -1;
+			    assert((stats == "total") | (stats == "interval"));
+			    if (stats == "total"){ 
+                    inst = task.stats[0].sum("inst_retired.any"); cycl = task.stats[0].sum("cpu_clk_unhalted.thread");
+			    } else if (stats == "interval"){
+			    	inst = task.stats[0].last("inst_retired.any"); cycl = task.stats[0].last("cpu_clk_unhalted.thread");
+			    }
+			    ipc = inst / cycl;
+			    ipcTotal += ipc;
+        
 		// ---
 		for (const auto &puntero : tasklist){
 			const Task &task     = *puntero; ID  = task.id;   PID = task.pids[0];
@@ -193,50 +238,7 @@ void optimal_transport::apply(uint64_t current_interval, const tasklist_t &taskl
 		    }
         }
 
-		// collect data for each application of the mix
-    	pid_t taskPID;  
-        uint64_t taskID;
-		double ipcTotal = 0;
-        // cpi obtaining values
-		for (const auto &task_ptr : tasklist) {
-			const Task &task     = *task_ptr;
-			taskID = task.id; 
-    	    std::string taskName = task.name; 
-			taskPID = task.pids[0]; 
-			//############################################################# 
-            // Performance counters for the CPI
-            double cycles       = task.stats[0].last("cpu_clk_unhalted.thread");
-            double instructions = task.stats[0].last("inst_retired.any");
-            // ----
-            uint64_t cpu    = get_cpu_id(taskPID);
-            
-			// Saving the values
-			for (const auto &Task_co_runner : tasklist) {
-				const Task &co_runner = *Task_co_runner;
-				uint64_t ID_co_runner = co_runner.id; 
-				pid_t PID_co_runner   = co_runner.pids[0]; 
-				uint64_t cpu_co_runner= get_cpu_id(PID_co_runner);
-
-				if(cpu == cpu_co_runner + SMTDIST || cpu == cpu_co_runner - SMTDIST){
-                    // Minimizing the CPI
-                    double cpi = cycles / instructions; 
-					M [taskID][ID_co_runner] += cpi; //CPI of the applications 
-					M [ID_co_runner][taskID] += cpi; //CPI of the applications   
-
-				}
-                // To avoid trying to pair an application with itself
-                // High cost for the diagonal of the matrix
-                if (taskID == ID_co_runner ){ M [ID_co_runner][taskID] = 100.0; } 
-            } // End for
-			    double inst = 0, cycl = 0, ipc = -1;
-			    assert((stats == "total") | (stats == "interval"));
-			    if (stats == "total"){ 
-                    inst = task.stats[0].sum("inst_retired.any"); cycl = task.stats[0].sum("cpu_clk_unhalted.thread");
-			    } else if (stats == "interval"){
-			    	inst = task.stats[0].last("inst_retired.any"); cycl = task.stats[0].last("cpu_clk_unhalted.thread");
-			    }
-			    ipc = inst / cycl;
-			    ipcTotal += ipc;
+		
     	} 
 		LOGINF("comb_necesarias {} | comb_realizadas {}"_format(size_comb, num_comb));
 		return;
