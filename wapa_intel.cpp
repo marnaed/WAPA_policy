@@ -137,7 +137,7 @@ void optimal_transport::apply(uint64_t current_interval, const tasklist_t &taskl
 			    }
 			    ipc = inst / cycl;
 			    ipcTotal += ipc;
-        
+        }
 		// ---
 		for (const auto &puntero : tasklist){
 			const Task &task     = *puntero; ID  = task.id;   PID = task.pids[0];
@@ -239,7 +239,7 @@ void optimal_transport::apply(uint64_t current_interval, const tasklist_t &taskl
         }
 
 		
-    	} 
+    	// } 
 		LOGINF("comb_necesarias {} | comb_realizadas {}"_format(size_comb, num_comb));
 		return;
 	} // end loop
